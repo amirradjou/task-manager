@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Task
 from .forms import CustomUserCreationForm
 from .serializes import TaskSerializer
+from .filters import TaskFilter
 
 
 class SignUpView(CreateView):
@@ -62,6 +63,10 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    filterset_class = TaskFilter
+    search_fields = ['title', 'description']
+    ordering_fields = ['due_date', 'title', 'created_at']
+    ordering = ['due_date']
 
     def get_queryset(self):
         # Ensure users can only see and manage their own tasks
