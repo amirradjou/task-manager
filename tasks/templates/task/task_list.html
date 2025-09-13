@@ -139,9 +139,9 @@
                             <i class="bi bi-arrow-clockwise me-1"></i>
                             Clear All
                         </a>
-                        <button type="button" class="btn btn-outline-info" onclick="toggleView()">
-                            <i class="bi bi-grid me-1"></i>
-                            <span id="viewToggle">List View</span>
+                        <button type="button" class="btn btn-outline-info" id="viewToggle" onclick="toggleView()">
+                            <i class="bi bi-list me-1"></i>
+                            List View
                         </button>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
     {% if tasks %}
         <div class="row" id="tasksContainer">
             {% for task in tasks %}
-                <div class="col-md-6 col-lg-4 mb-4 task-item">
+                <div class="col-md-6 col-lg-4 mb-4 task-item grid-view">
                     <div class="card task-card-enhanced {% if task.completed %}task-completed{% endif %} {% if task.due_date < today and not task.completed %}task-overdue{% endif %}">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div class="task-status">
@@ -236,6 +236,81 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- List View Item (hidden by default) -->
+                <div class="col-12 mb-3 task-item list-view" style="display: none;">
+                    <div class="card task-card-list {% if task.completed %}task-completed{% endif %} {% if task.due_date < today and not task.completed %}task-overdue{% endif %}">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <div class="task-status">
+                                        {% if task.completed %}
+                                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                        {% elif task.due_date < today %}
+                                            <i class="bi bi-exclamation-triangle-fill text-danger fs-4"></i>
+                                        {% else %}
+                                            <i class="bi bi-clock text-warning fs-4"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="card-title task-title mb-1">
+                                        {% if task.completed %}
+                                            <del>{{ task.title }}</del>
+                                        {% else %}
+                                            {{ task.title }}
+                                        {% endif %}
+                                    </h6>
+                                    <p class="card-text task-description mb-0 text-muted small">
+                                        {{ task.description|default:"No description provided."|truncatewords:10 }}
+                                    </p>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="due-date-info">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        <span class="due-date-text">{{ task.due_date|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="task-badges">
+                                        {% if task.completed %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Completed
+                                            </span>
+                                        {% elif task.due_date < today %}
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                Overdue
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-primary">
+                                                <i class="bi bi-clock me-1"></i>
+                                                Pending
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-person me-1"></i>
+                                        {{ task.owner.username }}
+                                    </small>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="task-actions d-flex gap-1">
+                                        <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Task">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Task">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
         </div>
     {% else %}
@@ -302,16 +377,29 @@
         });
         
         // Add hover effects to task cards
-        const taskCards = document.querySelectorAll('.task-card-enhanced');
+        const taskCards = document.querySelectorAll('.task-card-enhanced, .task-card-list');
         taskCards.forEach(card => {
             card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
+                this.style.transform = 'translateY(-2px)';
             });
             
             card.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0)';
             });
         });
+        
+        // Restore user's preferred view
+        const savedView = localStorage.getItem('taskView');
+        if (savedView === 'list') {
+            // Switch to list view
+            const toggle = document.getElementById('viewToggle');
+            const gridItems = document.querySelectorAll('.grid-view');
+            const listItems = document.querySelectorAll('.list-view');
+            
+            toggle.innerHTML = '<i class="bi bi-grid me-1"></i>Grid View';
+            gridItems.forEach(item => item.style.display = 'none');
+            listItems.forEach(item => item.style.display = 'block');
+        }
     });
     
     // Clear search function
@@ -320,17 +408,27 @@
         document.getElementById('filterForm').submit();
     }
     
-    // Toggle view function (placeholder for future list/grid view)
+    // Toggle view function
     function toggleView() {
         const toggle = document.getElementById('viewToggle');
-        const container = document.getElementById('tasksContainer');
+        const gridItems = document.querySelectorAll('.grid-view');
+        const listItems = document.querySelectorAll('.list-view');
         
-        if (toggle.textContent === 'List View') {
-            toggle.textContent = 'Grid View';
-            container.classList.add('list-view');
+        // Check if currently showing grid view (list items are hidden)
+        const isGridView = listItems.length > 0 && listItems[0].style.display === 'none';
+        
+        if (isGridView) {
+            // Switch to List View
+            toggle.innerHTML = '<i class="bi bi-grid me-1"></i>Grid View';
+            gridItems.forEach(item => item.style.display = 'none');
+            listItems.forEach(item => item.style.display = 'block');
+            localStorage.setItem('taskView', 'list');
         } else {
-            toggle.textContent = 'List View';
-            container.classList.remove('list-view');
+            // Switch to Grid View
+            toggle.innerHTML = '<i class="bi bi-list me-1"></i>List View';
+            gridItems.forEach(item => item.style.display = 'block');
+            listItems.forEach(item => item.style.display = 'none');
+            localStorage.setItem('taskView', 'grid');
         }
     }
     

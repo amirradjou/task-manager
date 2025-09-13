@@ -312,9 +312,57 @@
             gap: 0.5rem;
         }
         
-        .task-actions .btn {
-            border-radius: 0.5rem;
-            padding: 0.375rem 0.75rem;
+        /* List View Cards */
+        .task-card-list {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .task-card-list:hover {
+            box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-card-list.task-completed {
+            opacity: 0.8;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        }
+        
+        .task-card-list.task-overdue {
+            border-left: 4px solid var(--danger-color);
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        }
+        
+        .task-card-list .card-body {
+            padding: 1rem 1.5rem;
+        }
+        
+        .task-card-list .task-title {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .task-card-list .task-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        .task-card-list .due-date-info {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .task-card-list .task-badges .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .task-card-list .task-actions .btn {
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
         }
         
         /* Empty State */
@@ -357,6 +405,24 @@
             .task-actions {
                 width: 100%;
                 justify-content: flex-end;
+            }
+            
+            /* List view responsive */
+            .task-card-list .row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .task-card-list .col-md-1,
+            .task-card-list .col-md-2,
+            .task-card-list .col-md-4 {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .task-card-list .task-actions {
+                justify-content: flex-end;
+                margin-top: 0.5rem;
             }
         }
     </style>
