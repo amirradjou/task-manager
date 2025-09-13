@@ -1,22 +1,80 @@
 {% extends 'base.html' %}
 
+{% block title %}My Tasks - Task Manager{% endblock %}
+
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Tasks</h2>
-        <a href="{% url 'task_create' %}" class="btn btn-primary">Add New Task</a>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="bi bi-check2-square me-2"></i>
+                        My Tasks
+                    </h1>
+                    <p class="lead mb-0">Organize your life, one task at a time</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{% url 'task_create' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add New Task
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ tasks|length }}</div>
+                <div class="text-muted">Total Tasks</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ tasks|length|add:"-1"|add:"1" }}</div>
+                <div class="text-muted">Incomplete</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">0</div>
+                <div class="text-muted">Completed</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">0</div>
+                <div class="text-muted">Overdue</div>
+            </div>
+        </div>
     </div>
 
     <!-- Search and Filter Form -->
     <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-funnel me-2"></i>
+                Search & Filter Tasks
+            </h5>
+        </div>
         <div class="card-body">
             <form method="get" class="row g-3">
                 <div class="col-md-4">
-                    <label for="search" class="form-label">Search</label>
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search me-1"></i>
+                        Search
+                    </label>
                     <input type="text" class="form-control" id="search" name="search" 
                            value="{{ request.GET.search }}" placeholder="Search tasks...">
                 </div>
                 <div class="col-md-3">
-                    <label for="completed" class="form-label">Status</label>
+                    <label for="completed" class="form-label">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Status
+                    </label>
                     <select class="form-select" id="completed" name="completed">
                         <option value="">All Tasks</option>
                         <option value="false" {% if request.GET.completed == 'false' %}selected{% endif %}>Incomplete</option>
@@ -24,14 +82,20 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="overdue" class="form-label">Filter</label>
+                    <label for="overdue" class="form-label">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Filter
+                    </label>
                     <select class="form-select" id="overdue" name="overdue">
                         <option value="">All Tasks</option>
                         <option value="true" {% if request.GET.overdue == 'true' %}selected{% endif %}>Overdue Only</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="ordering" class="form-label">Sort By</label>
+                    <label for="ordering" class="form-label">
+                        <i class="bi bi-sort-down me-1"></i>
+                        Sort By
+                    </label>
                     <select class="form-select" id="ordering" name="ordering">
                         <option value="">Default</option>
                         <option value="due_date" {% if request.GET.ordering == 'due_date' %}selected{% endif %}>Due Date</option>
@@ -41,41 +105,101 @@
                     </select>
                 </div>
                 <div class="col-12">
-                    <button type="submit" class="btn btn-outline-primary">Filter</button>
-                    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">Clear</a>
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-funnel me-1"></i>
+                        Apply Filters
+                    </button>
+                    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Clear All
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Tasks List -->
     {% if tasks %}
-        <div class="list-group">
+        <div class="row">
             {% for task in tasks %}
-                <div class="list-group-item list-group-item-action flex-column align-items-start">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">
-                            {% if task.completed %}
-                                <del>{{ task.title }}</del>
-                            {% else %}
-                                {{ task.title }}
-                            {% endif %}
-                        </h5>
-                        <small>Due: {{ task.due_date }}</small>
-                    </div>
-                    <p class="mb-1">{{ task.description|default:"No description." }}</p>
-                    <div class="mt-2">
-                        <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-info">Edit</a>
-                        <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card task-card {% if task.completed %}task-completed{% endif %} {% if task.due_date < today %}task-overdue{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">
+                                    {% if task.completed %}
+                                        <del>{{ task.title }}</del>
+                                    {% else %}
+                                        {{ task.title }}
+                                    {% endif %}
+                                </h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{% url 'task_update' task.pk %}">
+                                            <i class="bi bi-pencil me-2"></i>Edit
+                                        </a></li>
+                                        <li><a class="dropdown-item text-danger" href="{% url 'task_delete' task.pk %}">
+                                            <i class="bi bi-trash me-2"></i>Delete
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <p class="card-text text-muted mb-3">
+                                {{ task.description|default:"No description provided."|truncatewords:15 }}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge {% if task.completed %}bg-success{% elif task.due_date < today %}bg-danger{% else %}bg-primary{% endif %}">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        {{ task.due_date }}
+                                    </span>
+                                    {% if task.completed %}
+                                        <span class="badge bg-success ms-1">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Completed
+                                        </span>
+                                    {% elif task.due_date < today %}
+                                        <span class="badge bg-danger ms-1">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            Overdue
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="alert alert-info" role="alert">
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+            </div>
             {% if request.GET.search or request.GET.completed or request.GET.overdue %}
-                No tasks match your search criteria. <a href="{% url 'task_list' %}" class="alert-link">Clear filters</a>
+                <h3 class="text-muted">No tasks match your search criteria</h3>
+                <p class="text-muted mb-4">Try adjusting your filters or search terms</p>
+                <a href="{% url 'task_list' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise me-2"></i>
+                    Clear Filters
+                </a>
             {% else %}
-                You have no tasks yet. <a href="{% url 'task_create' %}" class="alert-link">Create one now!</a>
+                <h3 class="text-muted">No tasks yet</h3>
+                <p class="text-muted mb-4">Get started by creating your first task</p>
+                <a href="{% url 'task_create' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Create Your First Task
+                </a>
             {% endif %}
         </div>
     {% endif %}
