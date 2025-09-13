@@ -1,31 +1,63 @@
-# Task Manager
+# Task Manager 📋
 
-A Django-based task management application with web interface and REST API.
+A modern Django-based task management application with intuitive web interface and REST API.
 
-## Features
+## ✨ Features
 
-- User authentication (signup/login)
-- Create, edit, delete tasks
-- Mark tasks as complete
-- Search and filter tasks
-- REST API with filtering and pagination
-- User isolation (users only see their own tasks)
+- **User Authentication**: Secure signup/login system
+- **Task Management**: Create, edit, delete, and mark tasks as complete
+- **Advanced Filtering**: Search and filter tasks by status, due date, and keywords
+- **REST API**: Full CRUD operations with authentication and pagination
+- **User Isolation**: Each user sees only their own tasks
+- **Responsive Design**: Modern UI with Bootstrap 5
 
-## Quick Start
+## 📱 Screenshots
 
-1. Clone the repository
-2. Create virtual environment: `python -m venv venv`
-3. Activate virtual environment: `source venv/bin/activate`
-4. Install dependencies: `pip install -r requirements.txt`
-5. Run migrations: `python manage.py migrate`
-6. Start server: `python manage.py runserver`
-7. Visit `http://127.0.0.1:8000/`
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+*Main dashboard with task statistics, search interface, and task cards*
 
-## API Usage
+### Login
+![Login](screenshots/login.png)
+*Clean login interface with modern design*
 
-The REST API is available at `/api/tasks/` with authentication required.
+### Sign Up
+![Sign Up](screenshots/signup.png)
+*User registration form with validation*
+
+## 🚀 Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd task-manager
+   ```
+
+2. **Set up environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Run the application**
+   ```bash
+   python manage.py migrate
+   python manage.py runserver
+   ```
+
+4. **Access the app**: http://127.0.0.1:8000/
+
+## 🔌 API Usage
+
+The REST API is available at `/api/tasks/` with token authentication.
 
 ```bash
+# Get authentication token
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"username": "your_username", "password": "your_password"}' \
+     http://127.0.0.1:8000/api/auth/token/
+
 # List tasks
 curl -H "Authorization: Token your-token" http://127.0.0.1:8000/api/tasks/
 
@@ -36,15 +68,17 @@ curl -X POST -H "Content-Type: application/json" \
      http://127.0.0.1:8000/api/tasks/
 ```
 
-## Testing
+## 🧪 Testing
 
 ```bash
 python manage.py test
 ```
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- Django 5.2.6
-- Django REST Framework
-- SQLite
-- django-filter
+- **Backend**: Django 5.2.6
+- **API**: Django REST Framework
+- **Frontend**: Bootstrap 5, Bootstrap Icons
+- **Database**: SQLite
+- **Authentication**: Django's built-in auth system
+- **Filtering**: django-filter
