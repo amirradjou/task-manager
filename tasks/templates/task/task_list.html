@@ -24,56 +24,81 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ tasks|length }}</div>
-                <div class="text-muted">Total Tasks</div>
+    <!-- Enhanced Stats Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-icon">
+                    <i class="bi bi-list-task"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">{{ total_tasks }}</div>
+                    <div class="stats-label">Total Tasks</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ tasks|length|add:"-1"|add:"1" }}</div>
-                <div class="text-muted">Incomplete</div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">{{ incomplete_tasks }}</div>
+                    <div class="stats-label">Incomplete</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">0</div>
-                <div class="text-muted">Completed</div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">{{ completed_tasks }}</div>
+                    <div class="stats-label">Completed</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">0</div>
-                <div class="text-muted">Overdue</div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card stats-card-danger">
+                <div class="stats-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">{{ overdue_tasks }}</div>
+                    <div class="stats-label">Overdue</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Search and Filter Form -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">
+    <!-- Enhanced Search and Filter Form -->
+    <div class="card filter-card mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0 text-white">
                 <i class="bi bi-funnel me-2"></i>
                 Search & Filter Tasks
             </h5>
         </div>
         <div class="card-body">
-            <form method="get" class="row g-3">
+            <form method="get" class="row g-3" id="filterForm">
                 <div class="col-md-4">
-                    <label for="search" class="form-label">
+                    <label for="search" class="form-label fw-semibold">
                         <i class="bi bi-search me-1"></i>
-                        Search
+                        Search Tasks
                     </label>
-                    <input type="text" class="form-control" id="search" name="search" 
-                           value="{{ request.GET.search }}" placeholder="Search tasks...">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ request.GET.search }}" placeholder="Search by title or description...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="col-md-3">
-                    <label for="completed" class="form-label">
+                    <label for="completed" class="form-label fw-semibold">
                         <i class="bi bi-check-circle me-1"></i>
-                        Status
+                        Status Filter
                     </label>
                     <select class="form-select" id="completed" name="completed">
                         <option value="">All Tasks</option>
@@ -82,9 +107,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="overdue" class="form-label">
+                    <label for="overdue" class="form-label fw-semibold">
                         <i class="bi bi-exclamation-triangle me-1"></i>
-                        Filter
+                        Priority Filter
                     </label>
                     <select class="form-select" id="overdue" name="overdue">
                         <option value="">All Tasks</option>
@@ -92,7 +117,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="ordering" class="form-label">
+                    <label for="ordering" class="form-label fw-semibold">
                         <i class="bi bi-sort-down me-1"></i>
                         Sort By
                     </label>
@@ -105,74 +130,106 @@
                     </select>
                 </div>
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary me-2">
-                        <i class="bi bi-funnel me-1"></i>
-                        Apply Filters
-                    </button>
-                    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-clockwise me-1"></i>
-                        Clear All
-                    </a>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel me-1"></i>
+                            Apply Filters
+                        </button>
+                        <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            Clear All
+                        </a>
+                        <button type="button" class="btn btn-outline-info" onclick="toggleView()">
+                            <i class="bi bi-grid me-1"></i>
+                            <span id="viewToggle">List View</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Tasks List -->
+    <!-- Enhanced Tasks List -->
     {% if tasks %}
-        <div class="row">
+        <div class="row" id="tasksContainer">
             {% for task in tasks %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card task-card {% if task.completed %}task-completed{% endif %} {% if task.due_date < today %}task-overdue{% endif %}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title mb-0">
-                                    {% if task.completed %}
-                                        <del>{{ task.title }}</del>
-                                    {% else %}
-                                        {{ task.title }}
-                                    {% endif %}
-                                </h5>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{% url 'task_update' task.pk %}">
-                                            <i class="bi bi-pencil me-2"></i>Edit
-                                        </a></li>
-                                        <li><a class="dropdown-item text-danger" href="{% url 'task_delete' task.pk %}">
-                                            <i class="bi bi-trash me-2"></i>Delete
-                                        </a></li>
-                                    </ul>
-                                </div>
+                <div class="col-md-6 col-lg-4 mb-4 task-item">
+                    <div class="card task-card-enhanced {% if task.completed %}task-completed{% endif %} {% if task.due_date < today and not task.completed %}task-overdue{% endif %}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="task-status">
+                                {% if task.completed %}
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                {% elif task.due_date < today %}
+                                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                                {% else %}
+                                    <i class="bi bi-clock text-warning"></i>
+                                {% endif %}
                             </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'task_update' task.pk %}">
+                                        <i class="bi bi-pencil me-2"></i>Edit Task
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'task_delete' task.pk %}">
+                                        <i class="bi bi-trash me-2"></i>Delete Task
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title task-title">
+                                {% if task.completed %}
+                                    <del>{{ task.title }}</del>
+                                {% else %}
+                                    {{ task.title }}
+                                {% endif %}
+                            </h5>
                             
-                            <p class="card-text text-muted mb-3">
-                                {{ task.description|default:"No description provided."|truncatewords:15 }}
+                            <p class="card-text task-description">
+                                {{ task.description|default:"No description provided."|truncatewords:20 }}
                             </p>
                             
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="badge {% if task.completed %}bg-success{% elif task.due_date < today %}bg-danger{% else %}bg-primary{% endif %}">
-                                        <i class="bi bi-calendar-event me-1"></i>
-                                        {{ task.due_date }}
-                                    </span>
+                            <div class="task-meta">
+                                <div class="due-date-info">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    <span class="due-date-text">Due: {{ task.due_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="task-badges">
                                     {% if task.completed %}
-                                        <span class="badge bg-success ms-1">
+                                        <span class="badge bg-success">
                                             <i class="bi bi-check-circle me-1"></i>
                                             Completed
                                         </span>
                                     {% elif task.due_date < today %}
-                                        <span class="badge bg-danger ms-1">
+                                        <span class="badge bg-danger">
                                             <i class="bi bi-exclamation-triangle me-1"></i>
                                             Overdue
                                         </span>
+                                    {% else %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-clock me-1"></i>
+                                            Pending
+                                        </span>
                                     {% endif %}
                                 </div>
-                                <div>
-                                    <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-primary">
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i>
+                                    {{ task.owner.username }}
+                                </small>
+                                <div class="task-actions">
+                                    <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Task">
                                         <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Task">
+                                        <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
                             </div>
@@ -182,25 +239,109 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="text-center py-5">
-            <div class="mb-4">
-                <i class="bi bi-inbox display-1 text-muted"></i>
+        <div class="empty-state text-center py-5">
+            <div class="empty-state-icon mb-4">
+                {% if request.GET.search or request.GET.completed or request.GET.overdue %}
+                    <i class="bi bi-search display-1 text-muted"></i>
+                {% else %}
+                    <i class="bi bi-clipboard-check display-1 text-primary"></i>
+                {% endif %}
             </div>
             {% if request.GET.search or request.GET.completed or request.GET.overdue %}
-                <h3 class="text-muted">No tasks match your search criteria</h3>
-                <p class="text-muted mb-4">Try adjusting your filters or search terms</p>
-                <a href="{% url 'task_list' %}" class="btn btn-primary">
-                    <i class="bi bi-arrow-clockwise me-2"></i>
-                    Clear Filters
-                </a>
+                <h3 class="text-muted mb-3">No tasks match your search criteria</h3>
+                <p class="text-muted mb-4">Try adjusting your filters or search terms to find what you're looking for</p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{% url 'task_list' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise me-2"></i>
+                        Clear Filters
+                    </a>
+                    <a href="{% url 'task_create' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create New Task
+                    </a>
+                </div>
             {% else %}
-                <h3 class="text-muted">No tasks yet</h3>
-                <p class="text-muted mb-4">Get started by creating your first task</p>
-                <a href="{% url 'task_create' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-plus-circle me-2"></i>
-                    Create Your First Task
-                </a>
+                <h3 class="text-muted mb-3">Welcome to your task dashboard!</h3>
+                <p class="text-muted mb-4">You don't have any tasks yet. Let's get started by creating your first task</p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{% url 'task_create' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create Your First Task
+                    </a>
+                    <button type="button" class="btn btn-outline-info" onclick="showTips()">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        Show Tips
+                    </button>
+                </div>
             {% endif %}
         </div>
     {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enhanced main page functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit form on filter change
+        const filterForm = document.getElementById('filterForm');
+        const filterSelects = filterForm.querySelectorAll('select');
+        
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        });
+        
+        // Animate stats cards on load
+        const statsCards = document.querySelectorAll('.stats-card');
+        statsCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+        
+        // Add hover effects to task cards
+        const taskCards = document.querySelectorAll('.task-card-enhanced');
+        taskCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+    
+    // Clear search function
+    function clearSearch() {
+        document.getElementById('search').value = '';
+        document.getElementById('filterForm').submit();
+    }
+    
+    // Toggle view function (placeholder for future list/grid view)
+    function toggleView() {
+        const toggle = document.getElementById('viewToggle');
+        const container = document.getElementById('tasksContainer');
+        
+        if (toggle.textContent === 'List View') {
+            toggle.textContent = 'Grid View';
+            container.classList.add('list-view');
+        } else {
+            toggle.textContent = 'List View';
+            container.classList.remove('list-view');
+        }
+    }
+    
+    // Show tips function
+    function showTips() {
+        alert('💡 Tips for using Task Manager:\n\n' +
+              '• Use descriptive titles for your tasks\n' +
+              '• Set realistic due dates\n' +
+              '• Use the search and filter features to stay organized\n' +
+              '• Mark tasks as complete to track your progress\n' +
+              '• Check overdue tasks regularly');
+    }
+</script>
 {% endblock %}

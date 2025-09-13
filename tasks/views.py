@@ -67,6 +67,25 @@ class TaskListView(LoginRequiredMixin, ListView):
         
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from django.utils import timezone
+        
+        # Get all user's tasks for stats (not filtered)
+        all_tasks = Task.objects.filter(owner=self.request.user)
+        
+        # Calculate stats
+        context['total_tasks'] = all_tasks.count()
+        context['completed_tasks'] = all_tasks.filter(completed=True).count()
+        context['incomplete_tasks'] = all_tasks.filter(completed=False).count()
+        context['overdue_tasks'] = all_tasks.filter(
+            due_date__lt=timezone.now().date(),
+            completed=False
+        ).count()
+        context['today'] = timezone.now().date()
+        
+        return context
+
 class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     fields = ['title', 'description', 'due_date'] # Fields the user can fill out
