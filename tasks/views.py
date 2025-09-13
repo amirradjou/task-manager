@@ -27,8 +27,45 @@ class TaskListView(LoginRequiredMixin, ListView):
     context_object_name = 'tasks'
 
     def get_queryset(self):
-        # This is the most important part: filter tasks by the current logged-in user.
-        return Task.objects.filter(owner=self.request.user)
+        from django.db.models import Q
+        from django.utils import timezone
+        
+        # Start with user's tasks
+        queryset = Task.objects.filter(owner=self.request.user)
+        
+        # Get filter parameters
+        search = self.request.GET.get('search')
+        completed = self.request.GET.get('completed')
+        overdue = self.request.GET.get('overdue')
+        ordering = self.request.GET.get('ordering')
+        
+        # Apply search filter
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | 
+                Q(description__icontains=search)
+            )
+        
+        # Apply completion status filter
+        if completed == 'true':
+            queryset = queryset.filter(completed=True)
+        elif completed == 'false':
+            queryset = queryset.filter(completed=False)
+        
+        # Apply overdue filter
+        if overdue == 'true':
+            queryset = queryset.filter(
+                due_date__lt=timezone.now().date(),
+                completed=False
+            )
+        
+        # Apply ordering
+        if ordering:
+            queryset = queryset.order_by(ordering)
+        else:
+            queryset = queryset.order_by('due_date')
+        
+        return queryset
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task

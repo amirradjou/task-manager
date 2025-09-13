@@ -6,6 +6,48 @@
         <a href="{% url 'task_create' %}" class="btn btn-primary">Add New Task</a>
     </div>
 
+    <!-- Search and Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ request.GET.search }}" placeholder="Search tasks...">
+                </div>
+                <div class="col-md-3">
+                    <label for="completed" class="form-label">Status</label>
+                    <select class="form-select" id="completed" name="completed">
+                        <option value="">All Tasks</option>
+                        <option value="false" {% if request.GET.completed == 'false' %}selected{% endif %}>Incomplete</option>
+                        <option value="true" {% if request.GET.completed == 'true' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="overdue" class="form-label">Filter</label>
+                    <select class="form-select" id="overdue" name="overdue">
+                        <option value="">All Tasks</option>
+                        <option value="true" {% if request.GET.overdue == 'true' %}selected{% endif %}>Overdue Only</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="ordering" class="form-label">Sort By</label>
+                    <select class="form-select" id="ordering" name="ordering">
+                        <option value="">Default</option>
+                        <option value="due_date" {% if request.GET.ordering == 'due_date' %}selected{% endif %}>Due Date</option>
+                        <option value="-due_date" {% if request.GET.ordering == '-due_date' %}selected{% endif %}>Due Date (Desc)</option>
+                        <option value="title" {% if request.GET.ordering == 'title' %}selected{% endif %}>Title</option>
+                        <option value="-title" {% if request.GET.ordering == '-title' %}selected{% endif %}>Title (Desc)</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-outline-primary">Filter</button>
+                    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {% if tasks %}
         <div class="list-group">
             {% for task in tasks %}
@@ -30,7 +72,11 @@
         </div>
     {% else %}
         <div class="alert alert-info" role="alert">
-            You have no tasks yet. <a href="{% url 'task_create' %}" class="alert-link">Create one now!</a>
+            {% if request.GET.search or request.GET.completed or request.GET.overdue %}
+                No tasks match your search criteria. <a href="{% url 'task_list' %}" class="alert-link">Clear filters</a>
+            {% else %}
+                You have no tasks yet. <a href="{% url 'task_create' %}" class="alert-link">Create one now!</a>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}
