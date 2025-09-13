@@ -5,9 +5,13 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Task
 from .forms import CustomUserCreationForm
+from .serializes import TaskSerializer
+
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
@@ -54,3 +58,15 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         # Ensure the user can only delete their own tasks.
         return Task.objects.filter(owner=self.request.user)
+
+class TaskViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Ensure users can only see and manage their own tasks
+        return Task.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically assign the logged-in user as the owner
+        serializer.save(owner=self.request.user)

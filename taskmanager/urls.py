@@ -23,4 +23,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     # Handles our app's pages (dashboard, signup)
     path('', include('tasks.urls')),
+    path('api/', include('tasks.api_urls')),
 ]
