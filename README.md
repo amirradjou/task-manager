@@ -16,7 +16,7 @@ A Django-based task management application with web interface and REST API.
 1. Clone the repository
 2. Create virtual environment: `python -m venv venv`
 3. Activate virtual environment: `source venv/bin/activate`
-4. Install dependencies: `pip install django djangorestframework django-filter`
+4. Install dependencies: `pip install -r requirements.txt`
 5. Run migrations: `python manage.py migrate`
 6. Start server: `python manage.py runserver`
 7. Visit `http://127.0.0.1:8000/`
